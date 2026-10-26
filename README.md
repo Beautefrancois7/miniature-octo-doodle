@@ -1,34 +1,35 @@
 const defaultBookmarks = [
-  { name: 'GitHub', url: 'https://github.com', category: 'work' },
-  { name: 'YouTube', url: 'https://youtube.com', category: 'learning' },
+  { name: 'GitHub', url: 'https://github.com', category: 'dev' },
+  { name: 'Notion', url: 'https://www.notion.so', category: 'ideas' },
+  { name: 'YouTube', url: 'https://www.youtube.com', category: 'learn' },
   { name: 'MDN', url: 'https://developer.mozilla.org', category: 'docs' },
-  { name: 'Notion', url: 'https://notion.so', category: 'planning' },
-  { name: 'Google Drive', url: 'https://drive.google.com', category: 'files' }
+  { name: 'Drive', url: 'https://drive.google.com', category: 'files' }
 ];
 
 const focusMessages = [
-  'Fai un piccolo passo concreto verso il tuo obiettivo principale.',
-  'Concentra oggi una parte di energia sul lavoro più importante.',
-  'Completa il task più utile prima di aprire distrazioni extra.',
-  'Un breve progresso costante vale più di un grande sforzo sporadico.'
+  'Scegli un compito importante e fai il primo passo concreto.',
+  'Lavorare sul task più rilevante oggi crea più valore del multitasking.',
+  'Un passo chiaro oggi apre una giornata più semplice domani.',
+  'Mantieni il focus su ciò che davvero muove il risultato.'
 ];
 
 const storageKeys = {
-  bookmarks: 'miniature-octo-bookmarks',
-  tasks: 'miniature-octo-tasks',
-  notes: 'miniature-octo-notes'
+  bookmarks: 'octo-bookmarks',
+  tasks: 'octo-tasks',
+  notes: 'octo-notes',
+  pomodoro: 'octo-pomodoro'
 };
 
 const element = (selector) => document.querySelector(selector);
 
-const buildInitialState = () => {
+function buildInitialBookmarks() {
   const saved = localStorage.getItem(storageKeys.bookmarks);
   return saved ? JSON.parse(saved) : defaultBookmarks;
-};
+}
 
 function renderBookmarks() {
   const bookmarkList = element('#bookmarkList');
-  const bookmarks = buildInitialState();
+  const bookmarks = buildInitialBookmarks();
 
   bookmarkList.innerHTML = bookmarks
     .map(
@@ -47,9 +48,18 @@ function saveBookmarks(bookmarks) {
   renderBookmarks();
 }
 
+function getTasks() {
+  return JSON.parse(localStorage.getItem(storageKeys.tasks) || '[]');
+}
+
+function saveTasks(tasks) {
+  localStorage.setItem(storageKeys.tasks, JSON.stringify(tasks));
+  renderTasks();
+}
+
 function renderTasks() {
   const taskList = element('#taskList');
-  const tasks = JSON.parse(localStorage.getItem(storageKeys.tasks) || '[]');
+  const tasks = getTasks();
 
   if (!tasks.length) {
     taskList.innerHTML = '<li class="task-item"><span>Nessun compito ancora. Aggiungine uno.</span></li>';
@@ -64,33 +74,21 @@ function renderTasks() {
             <input type="checkbox" ${task.done ? 'checked' : ''} data-id="${task.id}" />
             <span class="task-label">${task.text}</span>
           </label>
-          <button class="delete-btn" type="button" data-id="${task.id}">Elimina</button>
+          <button type="button" class="delete-btn" data-id="${task.id}">Elimina</button>
         </li>
       `
     )
     .join('');
 }
 
-function getTasks() {
-  return JSON.parse(localStorage.getItem(storageKeys.tasks) || '[]');
-}
-
-function saveTasks(tasks) {
-  localStorage.setItem(storageKeys.tasks, JSON.stringify(tasks));
-  renderTasks();
-}
-
 function updateClock() {
-  const timeLabel = element('#timeLabel');
-  const dayLabel = element('#dayLabel');
   const now = new Date();
-
-  timeLabel.textContent = now.toLocaleTimeString([], {
+  element('#timeLabel').textContent = now.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit'
   });
 
-  dayLabel.textContent = now.toLocaleDateString([], {
+  element('#dayLabel').textContent = now.toLocaleDateString([], {
     weekday: 'short',
     day: 'numeric',
     month: 'short'
@@ -98,13 +96,13 @@ function updateClock() {
 }
 
 function setGreeting() {
-  const greeting = element('#greetingText');
   const hour = new Date().getHours();
+  const greeting = element('#greetingText');
 
   if (hour < 12) {
-    greeting.textContent = 'Buongiorno, fai partire la giornata in modo chiaro.';
+    greeting.textContent = 'Buongiorno, mettiamo in moto la giornata.';
   } else if (hour < 18) {
-    greeting.textContent = 'Buon pomeriggio, mantieni il focus sul punto giusto.';
+    greeting.textContent = 'Buon pomeriggio, mantieni il focus sulla priorità.';
   } else {
     greeting.textContent = 'Buonasera, chiudi la giornata con un piccolo traguardo.';
   }
@@ -150,13 +148,8 @@ function bindBookmarkForm() {
       return;
     }
 
-    const bookmarks = buildInitialState();
-    bookmarks.unshift({
-      name,
-      url,
-      category: 'custom'
-    });
-
+    const bookmarks = buildInitialBookmarks();
+    bookmarks.unshift({ name, url, category: 'custom' });
     saveBookmarks(bookmarks);
     form.reset();
   });
@@ -174,12 +167,7 @@ function bindTaskForm() {
     }
 
     const tasks = getTasks();
-    tasks.unshift({
-      id: crypto.randomUUID(),
-      text,
-      done: false
-    });
-
+    tasks.unshift({ id: crypto.randomUUID(), text, done: false });
     saveTasks(tasks);
     input.value = '';
     input.focus();
@@ -197,7 +185,6 @@ function bindTaskActions() {
         }
         return task;
       });
-
       saveTasks(tasks);
     }
   });
@@ -212,12 +199,66 @@ function bindTaskActions() {
 
 function bindNotes() {
   const notes = element('#notes');
-  const saved = localStorage.getItem(storageKeys.notes) || '';
-  notes.value = saved;
+  notes.value = localStorage.getItem(storageKeys.notes) || '';
 
   notes.addEventListener('input', (event) => {
     localStorage.setItem(storageKeys.notes, event.target.value);
   });
+}
+
+function initializePomodoro() {
+  const timerDisplay = element('#timerDisplay');
+  const startBtn = element('#startTimer');
+  const resetBtn = element('#resetTimer');
+  const totalSeconds = 25 * 60;
+
+  let remaining = Number(localStorage.getItem(storageKeys.pomodoro)) || totalSeconds;
+  let timerId = null;
+
+  const updateDisplay = () => {
+    const minutes = Math.floor(remaining / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = (remaining % 60).toString().padStart(2, '0');
+    timerDisplay.textContent = `${minutes}:${seconds}`;
+  };
+
+  const persist = () => localStorage.setItem(storageKeys.pomodoro, String(remaining));
+
+  const stopTimer = () => {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  };
+
+  const startTimer = () => {
+    if (timerId) return;
+    timerId = setInterval(() => {
+      if (remaining > 0) {
+        remaining -= 1;
+        updateDisplay();
+        persist();
+      } else {
+        stopTimer();
+        if (Notification && Notification.permission === 'granted') {
+          new Notification('Pomodoro completato!');
+        }
+      }
+    }, 1000);
+  };
+
+  const resetTimer = () => {
+    stopTimer();
+    remaining = totalSeconds;
+    updateDisplay();
+    persist();
+  };
+
+  startBtn.addEventListener('click', startTimer);
+  resetBtn.addEventListener('click', resetTimer);
+
+  updateDisplay();
 }
 
 function initialize() {
@@ -228,10 +269,15 @@ function initialize() {
   bindTaskForm();
   bindTaskActions();
   bindNotes();
+  initializePomodoro();
   updateClock();
   setGreeting();
   setFocusMessage();
-  setInterval(updateClock, 1000 * 30);
+  setInterval(updateClock, 30000);
+}
+
+if (!('Notification' in window)) {
+  console.info('Questo browser non supporta le notifiche del desktop.');
 }
 
 initialize();
