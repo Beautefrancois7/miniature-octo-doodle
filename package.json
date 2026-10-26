@@ -1,0 +1,10 @@
+{
+  "name": "miniature-octo-doodle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A polished personal web dashboard app for quick access, notes, and focus tasks.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

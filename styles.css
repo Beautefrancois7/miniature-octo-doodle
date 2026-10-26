@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miniature Octo Doodle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Dashboard personale</p>
+          <h1>Miniature Octo Doodle</h1>
+        </div>
+        <div class="time-block">
+          <span id="dayLabel"></span>
+          <strong id="timeLabel">--:--</strong>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel hero-panel">
+          <div>
+            <p class="eyebrow muted">Buongiorno</p>
+            <h2 id="greetingText">Pronto a partire?</h2>
+          </div>
+          <div class="search-wrap">
+            <form id="searchForm">
+              <input id="searchInput" type="text" placeholder="Cerca online o salva un idea..." aria-label="Cerca" />
+              <select id="engineSelect" aria-label="Motore di ricerca">
+                <option value="google">Google</option>
+                <option value="bing">Bing</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+              </select>
+              <button type="submit">Cerca</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel spotlight-panel">
+          <div class="panel-head">
+            <h3>Focus del giorno</h3>
+            <span class="tag">Daily</span>
+          </div>
+          <p id="focusMessage">Fai un piccolo passo concreto verso il tuo obiettivo principale.</p>
+        </section>
+
+        <section class="panel bookmarks-panel">
+          <div class="panel-head">
+            <h3>Link veloci</h3>
+            <span class="tag">Bookmarks</span>
+          </div>
+          <div id="bookmarkList" class="bookmark-list" aria-live="polite"></div>
+
+          <form id="bookmarkForm" class="inline-form">
+            <input id="bookmarkName" type="text" placeholder="Titolo" required />
+            <input id="bookmarkUrl" type="url" placeholder="https://example.com" required />
+            <button type="submit">Aggiungi</button>
+          </form>
+        </section>
+
+        <section class="panel task-panel">
+          <div class="panel-head">
+            <h3>Todo</h3>
+            <span class="tag">Focus</span>
+          </div>
+          <form id="taskForm" class="inline-form compact">
+            <input id="taskInput" type="text" placeholder="Aggiungi un compito" required />
+            <button type="submit">+</button>
+          </form>
+          <ul id="taskList" class="task-list"></ul>
+        </section>
+
+        <section class="panel notes-panel">
+          <div class="panel-head">
+            <h3>Appunti</h3>
+            <span class="tag">Notes</span>
+          </div>
+          <textarea id="notes" rows="7" placeholder="Scrivi idee, richieste o appunti rapidi..."></textarea>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
